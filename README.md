@@ -69,3 +69,21 @@ To enhance cache hit rate, the practice of "warming up" the cache can be employe
 ![read-write-split-architecture](./images/read-write-split-architecture.png)
 
 ![read-write-split-config-flow-chart](./images/read-write-split-config-flow-chart.png)
+
+## Step4 Database Table Horizontal Sharding and Partitioning
+
+In Step 3, we improved the performance of data retrieval by implementing the master-slave mode. However, we have yet to find a solution to enhance the writing capability of the primary database. Therefore, in this phase, I propose horizontally sharding and partitioning the tables in the database to improve the performance of data insertion.
+
+#### 1. Horizontal Sharding
+
+![table-split-1](./images/table-split-1.png)
+
+#### 2. Horizontal Partitioning
+
+![table-split-2](./images/table-split-2.png)
+
+#### 3. Horizontal Sharding and Partitioning
+
+![table-split-3](./images/table-split-3.png)
+
+Horizontal sharding and partitioning offer the advantages of increased parallelism, reduced contention, improved scalability, targeted optimization, and workload isolation, resulting in optimized write performance. By distributing data across multiple shards or partitions, concurrent writes can be achieved, minimizing contention for system resources, and enabling linear scalability. Each shard or partition can be optimized individually, allowing for tailored indexing and performance optimizations, while workload isolation prevents write-intensive operations from impacting other critical processes. 
