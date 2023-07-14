@@ -87,3 +87,23 @@ In Step 3, we improved the performance of data retrieval by implementing the mas
 ![table-split-3](./images/table-split-3.png)
 
 Horizontal sharding and partitioning offer the advantages of increased parallelism, reduced contention, improved scalability, targeted optimization, and workload isolation, resulting in optimized write performance. By distributing data across multiple shards or partitions, concurrent writes can be achieved, minimizing contention for system resources, and enabling linear scalability. Each shard or partition can be optimized individually, allowing for tailored indexing and performance optimizations, while workload isolation prevents write-intensive operations from impacting other critical processes. 
+
+## Step4 Router Policy and Global ID in a Multi-Database and Multi-Table Environment
+
+### Business Scenarios for Multi-Table Queries
+
+![router-policy-1](./images/router-policy-1.png)
+
+After an order is created, from the user's perspective, there is a need to query the order and check its status. From the merchant's perspective, there is a requirement to retrieve order information and analyze the orders.
+
+![router-policy-2](./images/router-policy-2.png)
+
+However, in a multi-table environment, when a user places an order, the created orders may be stored in different tables, requiring queries to involve multiple tables.
+
+Therefore, to improve query efficiency, it is necessary to establish a routing rule that ensures orders created by the same user are stored in the same table as much as possible.
+
+### Router Policy
+
+![router-policy-3](./images/router-policy-3.png)
+
+Since the user_id is unique, it can be used as the routing key in this scenario. When a user places an order and the order is generated, the user_id is hashed, and then the resulting value is used to perform modulo operation with the number of tables. This ensures that the order information for the same user is stored in the same table.
