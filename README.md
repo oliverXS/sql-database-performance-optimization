@@ -1,4 +1,4 @@
-# SQL Database Performance Optimization
+# SQL Database Performance Optimization Step by Step
 
 ## Step1 Add Index
 
@@ -90,7 +90,7 @@ Horizontal sharding and partitioning offer the advantages of increased paralleli
 
 ## Step4 Router Policy and Global ID in a Multi-Database and Multi-Table Environment
 
-### Business Scenarios for Multi-Table Queries
+### Scenarios for Multi-Table Queries
 
 ![router-policy-1](./images/router-policy-1.png)
 
@@ -102,8 +102,50 @@ However, in a multi-table environment, when a user places an order, the created 
 
 Therefore, to improve query efficiency, it is necessary to establish a routing rule that ensures orders created by the same user are stored in the same table as much as possible.
 
-### Router Policy
+### Router Policy for User (toC)
+
+#### 1. Start from a Multi-table environment
 
 ![router-policy-3](./images/router-policy-3.png)
 
 Since the user_id is unique, it can be used as the routing key in this scenario. When a user places an order and the order is generated, the user_id is hashed, and then the resulting value is used to perform modulo operation with the number of tables. This ensures that the order information for the same user is stored in the same table.
+
+#### 2. Expand to a Multi-database and Multi-table environment
+
+Following the previous approach, first locate the database containing the order information, and then find the corresponding table within it.
+
+![router-policy-4](./images/router-policy-4.png)
+
+User places an order -> Generate an order -> Use the hash value of user_id to perform modulo operation with the number of databases to locate the corresponding database -> Divide the hash value of user_id by the number of tables and perform modulo operation to locate the corresponding table.
+
+### Router Policy for Merchant (toB)
+
+The merchant should be able to retrieve the corresponding user's order information. However, the merchant should not use user_id as the routing key. This is not reasonable.
+
+Therefore, from the user's perspective, use user_id as the routing key. From the merchant's perspective, use merchant_id as the routing key.。
+
+![router-policy-5](./images/router-policy-5.png)
+
+Introduce RocketMQ as the message queue. When a user places an order, the order number is sent to the MQ. The merchant consumes this MQ message, retrieves the order information based on the order number, and then inserts the order information into the user's database.
+
+### Generate globally unique IDs for order table
+
+Introduce the SnowFlake algorithm.
+
+![snowflake](./images/snowflake.png)
+
+Snowflake algorithm can generate globally unique order IDs based on different servers and timestamps.
+
+### Optimize the Scalability of Database Servers
+
+Introduce consistent hash algorithm to replace the hash algorithm for the fixed number of servers.
+
+![consistant-hashing](./images/consistant-hashing.png)
+
+#### 1. Data migration
+
+Set the database server on a hash ring of length 2^32 -1. When the server increases or decreases, the amount of data that needs to be migrated is greatly reduced.
+
+#### 2. Load balancing
+
+Introduce virtual nodes on the hash ring to ensure load balancing and avoid a large number of requests to access the same server.
