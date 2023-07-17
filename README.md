@@ -140,7 +140,7 @@ Snowflake algorithm can generate globally unique order IDs based on different se
 
 Introduce consistent hash algorithm to replace the hash algorithm for the fixed number of servers.
 
-[More about Consistent Hashing] (https://github.com/oliverXS/consistent-hashing-java)
+[More about Consistent Hashing](https://github.com/oliverXS/consistent-hashing-java)
 
 ![consistant-hashing](./images/consistant-hashing.png)
 
