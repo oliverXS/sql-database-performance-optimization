@@ -136,11 +136,13 @@ Introduce the SnowFlake algorithm.
 
 Snowflake algorithm can generate globally unique order IDs based on different servers and timestamps.
 
+[Learn more about Snowflake Algorithm](https://github.com/oliverXS/snowflake-algorithm-java)
+
 ### Optimize the Scalability of Database Servers
 
 Introduce consistent hash algorithm to replace the hash algorithm for the fixed number of servers.
 
-[More about Consistent Hashing](https://github.com/oliverXS/consistent-hashing-java)
+[Learn more about Consistent Hashing](https://github.com/oliverXS/consistent-hashing-java)
 
 ![consistant-hashing](./images/consistant-hashing.png)
 
