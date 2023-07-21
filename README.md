@@ -1,5 +1,34 @@
 # SQL Database Performance Optimization Step by Step
 
+- [SQL Database Performance Optimization Step by Step](#sql-database-performance-optimization-step-by-step)
+  - [Step1 Add Index](#step1-add-index)
+    - [Table Design](#table-design)
+    - [Generate Data](#generate-data)
+    - [Without an index](#without-an-index)
+    - [With an index](#with-an-index)
+  - [Step2 Introduce Redis as cache](#step2-introduce-redis-as-cache)
+    - [Strategies to Enhance Cache Hit Rate](#strategies-to-enhance-cache-hit-rate)
+      - [1. Identifying Appropriate Business Scenarios](#1-identifying-appropriate-business-scenarios)
+      - [2. Setting the Cache Capacity Judiciously](#2-setting-the-cache-capacity-judiciously)
+      - [3. Fine-tuning Cache Expiration Time](#3-fine-tuning-cache-expiration-time)
+      - [4. Mitigating Cache Penetration](#4-mitigating-cache-penetration)
+      - [5. Implementing Cache Warm-Up](#5-implementing-cache-warm-up)
+  - [Step3 Read/Write Splitting](#step3-readwrite-splitting)
+  - [Step4 Database Table Horizontal Sharding and Partitioning](#step4-database-table-horizontal-sharding-and-partitioning)
+      - [1. Horizontal Sharding](#1-horizontal-sharding)
+      - [2. Horizontal Partitioning](#2-horizontal-partitioning)
+      - [3. Horizontal Sharding and Partitioning](#3-horizontal-sharding-and-partitioning)
+  - [Step4 Router Policy and Global ID in a Multi-Database and Multi-Table Environment](#step4-router-policy-and-global-id-in-a-multi-database-and-multi-table-environment)
+    - [Scenarios for Multi-Table Queries](#scenarios-for-multi-table-queries)
+    - [Router Policy for User (toC)](#router-policy-for-user-toc)
+      - [1. Start from a Multi-table environment](#1-start-from-a-multi-table-environment)
+      - [2. Expand to a Multi-database and Multi-table environment](#2-expand-to-a-multi-database-and-multi-table-environment)
+    - [Router Policy for Merchant (toB)](#router-policy-for-merchant-tob)
+    - [Generate globally unique IDs for order table](#generate-globally-unique-ids-for-order-table)
+    - [Optimize the Scalability of Database Servers](#optimize-the-scalability-of-database-servers)
+      - [1. Data migration](#1-data-migration)
+      - [2. Load balancing](#2-load-balancing)
+
 ## Step1 Add Index
 
 Indexes are used in MySQL to find rows with specific column values quickly. Without an index, MySQL must begin with the first row and then read through the entire table to find the relevant rows, which is inefficient for large datasets.
