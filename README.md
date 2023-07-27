@@ -7,6 +7,7 @@
     - [Without an index](#without-an-index)
     - [With an index](#with-an-index)
   - [Step2 Introduce Redis as cache](#step2-introduce-redis-as-cache)
+    - [Core Code](#core-code)
     - [Strategies to Enhance Cache Hit Rate](#strategies-to-enhance-cache-hit-rate)
       - [1. Identifying Appropriate Business Scenarios](#1-identifying-appropriate-business-scenarios)
       - [2. Setting the Cache Capacity Judiciously](#2-setting-the-cache-capacity-judiciously)
@@ -253,6 +254,62 @@ Although the use of index improves the query speed of mysql, a large number of r
 ![redis-data-flow-chart](./images/redis-data-flow-chart.png)
 
 In order to reduce the burden on the MySQL server, Redis is introduced as a cache. In order to make Redis achieve the desired effect, it is necessary to improve the cache hit rate as much as possible.
+
+### Core Code 
+
+```java
+public Page<OrderInfoVO> queryOrderInfoList(OrderInfoQuery orderInfoQuery) {
+    // Validate the orderInfoQuery to ensure it meets the required criteria
+    OrderValidation.checkVerifyOrderQuery(orderInfoQuery);
+
+    // Create a new Page object to hold the results
+    Page<OrderInfoVO> page = new Page<>();
+
+    // Set the current page number and page size based on the query parameters
+    page.setCurrent(orderInfoQuery.getCurrent());
+    page.setSize(orderInfoQuery.getSize());
+
+    // Query completed orders
+    if (FINISH.equals(orderInfoQuery.getOrderStatus())) {
+        // Assemble the Redis key based on the query parameters to uniquely identify the data
+        // redis key = user_id + page_number + page_size
+        String redisKey = orderInfoQuery.getUserId() + orderInfoQuery.getCurrent().toString() + orderInfoQuery.getSize().toString();
+
+        // Check if the data is available in the Redis cache
+        Object redisObject = redisUtils.get(redisKey);
+
+        // If Redis cache is empty, query the data from the database
+        if (Objects.isNull(redisObject)) {
+            // Query the order information list from the database
+            Page<OrderInfoVO> userOrderInfoVOPage = orderInfoRepository.queryOrderInfoList(page, orderInfoQuery);
+
+            // Set the result into Redis cache with an expiration time of one hour (3600 seconds)
+            redisUtils.set(redisKey, userOrderInfoVOPage, 3600L, TimeUnit.SECONDS);
+
+            // Return the query result obtained from the database
+            return userOrderInfoVOPage;
+        }
+
+        // If Redis cache contains the data, return it directly without querying the database
+        log.info("Retrieved data from Redis, key: {}", redisKey);
+        return (Page<OrderInfoVO>) redisObject;
+    }
+
+    // If the order status is not 'FINISH', query the order information list from the database
+    return orderInfoRepository.queryOrderInfoList(page, orderInfoQuery);
+}
+```
+
+A `Pag` object is created to hold the results of the query. The current page number and page size are set based on the `orderInfoQuery` parameters to determine which subset of data should be fetched.
+
+The method then checks if the query is specifically for completed orders by comparing the order status with a constant `FINISH`. If it is, the method performs the following steps:
+
+1. Assembles a Redis key using the `orderInfoQuery` parameters (user ID, current page number, and page size) to uniquely identify the cached data.
+2. Checks if the data is available in the Redis cache.
+3. If the Redis cache is empty (no cached data found), it queries the database for the order information. The result is stored in the Redis cache with a specified expiration time of one hour (3600 seconds).
+4. The method returns the query result obtained from the database.
+
+If the query is not for completed orders, the method simply queries the order information list from the database without caching and returns the results.
 
 ### Strategies to Enhance Cache Hit Rate
 
