@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oliver.mapper.OrderInfoMapper">
+    <resultMap id="BaseResultMap" type="com.oliver.domain.entity.OrderInfo">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+        <result column="order_amount" jdbcType="DECIMAL" property="orderAmount"/>
+        <result column="merchant_id" jdbcType="BIGINT" property="merchantId"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="order_freight" jdbcType="DECIMAL" property="orderFreight"/>
+        <result column="order_status" jdbcType="TINYINT" property="orderStatus"/>
+        <result column="trans_time" jdbcType="TIMESTAMP" property="transTime"/>
+        <result column="pay_status" jdbcType="TINYINT" property="payStatus"/>
+        <result column="recharge_time" jdbcType="TIMESTAMP" property="rechargeTime"/>
+        <result column="pay_amount" jdbcType="DECIMAL" property="payAmount"/>
+        <result column="pay_discount_amount" jdbcType="DECIMAL" property="payDiscountAmount"/>
+        <result column="address_id" jdbcType="BIGINT" property="addressId"/>
+        <result column="delivery_type" jdbcType="TINYINT" property="deliveryType"/>
+        <result column="delivery_status" jdbcType="TINYINT" property="deliveryStatus"/>
+        <result column="delivery_expect_time" jdbcType="TIMESTAMP" property="deliveryExpectTime"/>
+        <result column="delivery_complete_time" jdbcType="TIMESTAMP" property="deliveryCompleteTime"/>
+        <result column="delivery_amount" jdbcType="DECIMAL" property="deliveryAmount"/>
+        <result column="coupon_id" jdbcType="BIGINT" property="couponId"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_user" jdbcType="BIGINT" property="createUser"/>
+        <result column="update_user" jdbcType="BIGINT" property="updateUser"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="delete_flag" jdbcType="TINYINT" property="deleteFlag"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, order_no, order_amount, merchant_id, user_id, order_freight, order_status, trans_time,
+    pay_status, recharge_time, pay_amount, pay_discount_amount, address_id, delivery_type,
+    delivery_status, delivery_expect_time, delivery_complete_time, delivery_amount, coupon_id,
+    remark, create_user, update_user, create_time, update_time, delete_flag
+    </sql>
+
+
+    <insert id="insertSelective" parameterType="com.oliver.domain.entity.OrderInfo"  keyProperty="id" useGeneratedKeys="true" >
+        insert into order_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo  != null and orderNo != '' ">
+                order_no,
+            </if>
+            <if test="orderAmount  != null and orderAmount != ''">
+                order_amount,
+            </if>
+            <if test="merchantId  != null and merchantId != ''">
+                merchant_id,
+            </if>
+            <if test="userId  != null and userId != ''">
+                user_id,
+            </if>
+            <if test="orderFreight  != null and orderFreight != ''">
+                order_freight,
+            </if>
+            <if test="orderStatus  != null and orderStatus != ''">
+                order_status,
+            </if>
+            <if test="transTime  != null and transTime != ''">
+                trans_time,
+            </if>
+            <if test="payStatus  != null and payStatus != ''">
+                pay_status,
+            </if>
+            <if test="rechargeTime  != null and rechargeTime != ''">
+                recharge_time,
+            </if>
+            <if test="payAmount  != null and payAmount != ''">
+                pay_amount,
+            </if>
+            <if test="payDiscountAmount  != null and payDiscountAmount != ''">
+                pay_discount_amount,
+            </if>
+            <if test="addressId  != null and addressId != ''">
+                address_id,
+            </if>
+            <if test="deliveryType  != null and deliveryType != ''">
+                delivery_type,
+            </if>
+            <if test="deliveryStatus  != null and deliveryStatus != ''">
+                delivery_status,
+            </if>
+            <if test="deliveryExpectTime  != null and deliveryExpectTime != ''">
+                delivery_expect_time,
+            </if>
+            <if test="deliveryCompleteTime  != null and deliveryCompleteTime != ''">
+                delivery_complete_time,
+            </if>
+            <if test="deliveryAmount  != null and deliveryAmount != ''">
+                delivery_amount,
+            </if>
+            <if test="couponId  != null and couponId != ''">
+                coupon_id,
+            </if>
+            <if test="remark  != null and remark != ''">
+                remark,
+            </if>
+            <if test="createUser  != null and createUser != ''">
+                create_user,
+            </if>
+            <if test="updateUser  != null and updateUser != ''">
+                update_user,
+            </if>
+            <if test="createTime  != null and createTime != ''">
+                create_time,
+            </if>
+            <if test="updateTime  != null and updateTime != ''">
+                update_time,
+            </if>
+            <if test="deleteFlag  != null and deleteFlag != ''">
+                delete_flag,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo  != null and orderNo != ''">
+                #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="orderAmount  != null and orderAmount != ''">
+                #{orderAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="merchantId  != null and merchantId != ''">
+                #{merchantId,jdbcType=BIGINT},
+            </if>
+            <if test="userId  != null and userId != ''">
+                #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="orderFreight  != null and orderFreight != ''">
+                #{orderFreight,jdbcType=DECIMAL},
+            </if>
+            <if test="orderStatus  != null and orderStatus != ''">
+                #{orderStatus,jdbcType=BIGINT},
+            </if>
+            <if test="transTime  != null and transTime != ''">
+                #{transTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="payStatus  != null and payStatus != ''">
+                #{payStatus,jdbcType=BIGINT},
+            </if>
+            <if test="rechargeTime  != null and rechargeTime != ''">
+                #{rechargeTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="payAmount  != null and payAmount != ''">
+                #{payAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payDiscountAmount  != null and payDiscountAmount != ''">
+                #{payDiscountAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="addressId  != null and addressId != ''">
+                #{addressId,jdbcType=BIGINT},
+            </if>
+            <if test="deliveryType  != null and deliveryType != ''">
+                #{deliveryType,jdbcType=BIGINT},
+            </if>
+            <if test="deliveryStatus  != null and deliveryStatus != ''">
+                #{deliveryStatus,jdbcType=BIGINT},
+            </if>
+            <if test="deliveryExpectTime  != null and deliveryExpectTime != ''">
+                #{deliveryExpectTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deliveryCompleteTime  != null and deliveryCompleteTime != ''">
+                #{deliveryCompleteTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deliveryAmount  != null and deliveryAmount != ''">
+                #{deliveryAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="couponId  != null and couponId != ''">
+                #{couponId,jdbcType=BIGINT},
+            </if>
+            <if test="remark  != null and remark != ''">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createUser  != null and createUser != ''">
+                #{createUser,jdbcType=BIGINT},
+            </if>
+            <if test="updateUser  != null and updateUser != ''">
+                #{updateUser,jdbcType=BIGINT},
+            </if>
+            <if test="createTime  != null and createTime != ''">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime  != null and updateTime != ''">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deleteFlag  != null and deleteFlag != ''">
+                #{deleteFlag,jdbcType=TINYINT},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="queryOrderInfoList" resultType="com.oliver.domain.vo.OrderInfoVO">
+        select
+        <include refid="Base_Column_List"/>
+        from order_info
+        <where>
+            <if test="record.userId  != null and record.userId != ''">
+                delete_flag = 0  and user_id = #{record.userId,jdbcType=VARCHAR}
+            </if>
+            <if test="record.merchantId  != null and record.merchantId != ''">
+                and merchant_id = #{record.merchantId,jdbcType=BIGINT}
+            </if>
+            <if test="record.orderNo  != null and record.orderNo != ''">
+                and order_no = #{record.orderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="record.orderStatus != null">
+                and order_status = #{record.orderStatus,jdbcType=TINYINT}
+            </if>
+            <if test="record.startTransTime  != null and record.startTransTime != ''">
+                and trans_time > #{record.startTransTime}
+            </if>
+            <if test="record.endTransTime  != null and record.endTransTime != ''">
+                <![CDATA[ and trans_time < #{record.endTransTime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <update id="updateOrderStatus">
+        update order_info
+        set order_status = #{status}
+        where order_no = #{orderNo}
+    </update>
+
+    <select id="queryNoPayOrderList" resultType="com.oliver.domain.entity.OrderInfo">
+        select order_no, order_status, trans_time
+        from order_info
+        where order_status = 10
+          and trans_time > SUBDATE(trans_time, interval -900 second)
+        order by trans_time
+    </select>
+
+    <select id="getOrderInfoByNo" resultType="com.oliver.domain.vo.OrderInfoVO">
+        select
+        <include refid="Base_Column_List"/>
+        from order_info where order_no = #{orderNo}
+    </select>
+
+    <select id="getOrderNoById" resultType="java.lang.String">
+        select order_no from order_info where id = #{orderId}
+    </select>
+
+</mapper>
