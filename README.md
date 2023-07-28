@@ -76,7 +76,7 @@ Table 2: `order_item_detail`
 | discount_amount | DECIMAL(10, 2) | Discount amount              |
 | discount_id     | BIGINT         | Discount ID                  |
 
-### Generate Data
+### Generate Fake Data
 
 Use Python script with faker lib to generate a hundred thousand rows for the two tables.
 
@@ -87,10 +87,8 @@ from faker import Faker
 import datetime
 import pymysql
 
-# Set the number of records to generate
 num_records = 100000
 
-# Connect to the MySQL database
 db = pymysql.connect(
     host="localhost",
     user="root",
@@ -98,10 +96,7 @@ db = pymysql.connect(
     database="monomer_order"
 )
 
-# Create a cursor to execute SQL queries
 cursor = db.cursor()
-
-# Instantiate the Faker library
 fake = Faker()
 
 def get_order_no(user_id):
@@ -116,39 +111,43 @@ def get_date_time_key():
     return date_time
 
 def get_auto_no_key():
-    range_start = 10**(6-1)
-    range_end = (10**6)-1
+    range_start = 10 ** (6 - 1)
+    range_end = (10 ** 6) - 1
     return str(random.randint(range_start, range_end))
 
 def to_code(value):
     return str(value).rjust(4, '0')
 
-# Generate and insert data into the order_info and order_item_detail tables
+def get_bigint():
+    return random.randint(0, 9223372036854775807)
+
 for _ in range(num_records):
-    order_no = get_order_no(fake.random_int(min=0, max=999999999999999999))  # Call the function to generate order_no
+    user_id = get_bigint()
+    order_no = get_order_no(user_id)
     order_amount = decimal.Decimal(random.uniform(100, 10000))
     order_freight = decimal.Decimal(random.uniform(5, 50))
     order_status = random.choice([10, 20, 30, 40, 50, 55, 60, 70])
     trans_time = fake.date_between(start_date="-1y", end_date="today")
     pay_status = random.choice([1, 2])
-    merchant_id = fake.random_int(min=0, max=999999999999999999)
-    user_id = fake.random_int(min=0, max=999999999999999999)
+    merchant_id = get_bigint()
     recharge_time = fake.date_between(start_date="-1y", end_date="today")
     pay_discount_amount = decimal.Decimal(random.uniform(0, 100))
     pay_amount = decimal.Decimal(random.uniform(100, 10000))
-    address_id = fake.random_int(min=0, max=999999999999999999)
+    address_id = get_bigint()
     remark = fake.text(max_nb_chars=100)
     delivery_type = random.choice([1, 2])
     delivery_status = random.choice([0, 1, 2])
-    delivery_expect_time = fake.date_between(start_date="today", end_date="+1y")
-    delivery_complete_time = fake.date_between(start_date="-1y", end_date="today")
+    delivery_expect_time = fake.date_between(start_date="-1y", end_date="today")
+    delivery_complete_time = fake.date_between(start_date=delivery_expect_time, end_date="today")
     delivery_amount = decimal.Decimal(random.uniform(5, 50))
     buyer_status = random.choice([0, 1, 2, 3])
-    coupon_id = fake.random_int(min=0, max=999999999999999999)
+    coupon_id = get_bigint()
+    create_time = fake.date_between(start_date="-1y", end_date="today")
+    update_time = fake.date_between(start_date=create_time, end_date="today")
+    delete_flag = random.choice([0, 1])
 
-    # Insert the generated data into the order_info table
     cursor.execute(
-        "INSERT INTO order_info (order_no, order_amount, order_freight, order_status, trans_time, pay_status, merchant_id, user_id, recharge_time, pay_discount_amount, pay_amount, address_id, remark, delivery_type, delivery_status, delivery_expect_time, delivery_complete_time, delivery_amount, buyer_status, coupon_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        "INSERT INTO order_info (order_no, order_amount, order_freight, order_status, trans_time, pay_status, merchant_id, user_id, recharge_time, pay_discount_amount, pay_amount, address_id, remark, delivery_type, delivery_status, delivery_expect_time, delivery_complete_time, delivery_amount, buyer_status, coupon_id, create_time, update_time, delete_flag) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
         (
             order_no,
             order_amount,
@@ -170,22 +169,23 @@ for _ in range(num_records):
             delivery_amount,
             buyer_status,
             coupon_id,
+            create_time,
+            update_time,
+            delete_flag,
         )
     )
 
-    # Generate and insert data into the order_item_detail table
-    for _ in range(random.randint(1, 5)):  # Generate 1-5 items for each order
-        product_id = fake.random_int(min=0, max=999999999999999999)
-        category_id = fake.random_int(min=0, max=999999999999999999)
+    order_item_detail_data = []
+    for _ in range(random.randint(1, 5)):
+        product_id = get_bigint()
+        category_id = get_bigint()
         goods_num = decimal.Decimal(random.uniform(1, 10))
         goods_price = decimal.Decimal(random.uniform(10, 100))
         goods_amount = goods_num * goods_price
         discount_amount = decimal.Decimal(random.uniform(0, 10))
-        discount_id = fake.random_int(min=0, max=999999999999999999)
+        discount_id = get_bigint()
 
-        # Insert the generated data into the order_item_detail table
-        cursor.execute(
-            "INSERT INTO order_item_detail (order_no, product_id, category_id, goods_num, goods_price, goods_amount, discount_amount, discount_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        order_item_detail_data.append(
             (
                 order_no,
                 product_id,
@@ -195,10 +195,19 @@ for _ in range(num_records):
                 goods_amount,
                 discount_amount,
                 discount_id,
+                user_id,  # Replaced create_user and update_user with user_id as it was not defined
+                user_id,
+                create_time,
+                update_time,
+                delete_flag,
             )
         )
 
-# Commit the changes and close the database connection
+    cursor.executemany(
+        "INSERT INTO order_item_detail (order_no, product_id, category_id, goods_num, goods_price, goods_amount, discount_amount, discount_id, create_user, update_user, create_time, update_time, delete_flag) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        order_item_detail_data,
+    )
+
 db.commit()
 cursor.close()
 db.close()
@@ -310,6 +319,25 @@ The method then checks if the query is specifically for completed orders by comp
 4. The method returns the query result obtained from the database.
 
 If the query is not for completed orders, the method simply queries the order information list from the database without caching and returns the results.
+
+### Performance evaluation
+
+#### Test API by Postman
+
+![postman](./images/postman.png)
+
+Based on the provided log information, we can observe a significant performance improvement when fetching data from Redis compared to fetching data from MySQL. Here's a comparison of the two scenarios:
+
+- First Time (Data from MySQL)
+  - `INFO 66223 --- [nio-8080-exec-9] c.oliver.controller.UserOrderController  : Time taken to query user order: 107`
+
+- Second Time (Data from Redis)
+  - `INFO 66223 --- [nio-8080-exec-1] c.o.s.u.impl.UserOrderInfoServiceImpl    : Retrieved data from Redis, key: 2326541630243225473110`
+  - `INFO 66223 --- [nio-8080-exec-1] c.oliver.controller.UserOrderController  : Time taken to query user order: 14`
+
+This difference in query time indicates that Redis is significantly faster in responding to data retrieval requests compared to MySQL. Redis is an in-memory data store, which means it stores data in RAM, allowing for faster data access and retrieval. On the other hand, MySQL is a disk-based database, and even though it is well-optimized, disk access is generally slower than RAM access.
+
+**Performance Improvement Percentage ≈ 93.46%%**
 
 ### Strategies to Enhance Cache Hit Rate
 
