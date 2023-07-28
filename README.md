@@ -8,6 +8,7 @@
     - [With an index](#with-an-index)
   - [Step2 Introduce Redis as cache](#step2-introduce-redis-as-cache)
     - [Core Code](#core-code)
+    - [Performance Evaluation](#performance-evaluation)
     - [Strategies to Enhance Cache Hit Rate](#strategies-to-enhance-cache-hit-rate)
       - [1. Identifying Appropriate Business Scenarios](#1-identifying-appropriate-business-scenarios)
       - [2. Setting the Cache Capacity Judiciously](#2-setting-the-cache-capacity-judiciously)
@@ -320,7 +321,7 @@ The method then checks if the query is specifically for completed orders by comp
 
 If the query is not for completed orders, the method simply queries the order information list from the database without caching and returns the results.
 
-### Performance evaluation
+### Performance Evaluation
 
 #### Test API by Postman
 
