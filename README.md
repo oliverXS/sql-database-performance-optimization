@@ -62,20 +62,30 @@ Table 1: `order_info`
 | delivery_amount        | DECIMAL(10, 2) | Delivery amount                  |
 | buyer_status           | BIGINT         | Buyer status                     |
 | coupon_id              | BIGINT         | Coupon ID                        |
+| create_user            | BIGINT         | User create                      |
+| update_user            | BIGINT         | User update                      |
+| create_time            | DATE           | Create time                      |
+| update_time            | DATE           | Update time                      |
+| delete_flag            | INT            | 0 is not deleted, 1 is deleted   |
 
 Table 2: `order_item_detail`
 
-| Field           | Data Type      | Description                  |
-| --------------- | -------------- | ---------------------------- |
-| id              | BIGINT         | Auto-incremented primary key |
-| order_no        | VARCHAR(255)   | Order number                 |
-| product_id      | BIGINT         | Product ID                   |
-| category_id     | BIGINT         | Category ID                  |
-| goods_num       | DECIMAL(10, 2) | Number of goods              |
-| goods_price     | DECIMAL(10, 2) | Price per unit               |
-| goods_amount    | DECIMAL(10, 2) | Total goods amount           |
-| discount_amount | DECIMAL(10, 2) | Discount amount              |
-| discount_id     | BIGINT         | Discount ID                  |
+| Field           | Data Type      | Description                    |
+| :-------------- | -------------- | ------------------------------ |
+| id              | BIGINT         | Auto-incremented primary key   |
+| order_no        | VARCHAR(255)   | Order number                   |
+| product_id      | BIGINT         | Product ID                     |
+| category_id     | BIGINT         | Category ID                    |
+| goods_num       | DECIMAL(10, 2) | Number of goods                |
+| goods_price     | DECIMAL(10, 2) | Price per unit                 |
+| goods_amount    | DECIMAL(10, 2) | Total goods amount             |
+| discount_amount | DECIMAL(10, 2) | Discount amount                |
+| discount_id     | BIGINT         | Discount ID                    |
+| create_user     | BIGINT         | User create                    |
+| update_user     | BIGINT         | User update                    |
+| create_time     | DATE           | Create time                    |
+| update_time     | DATE           | Update time                    |
+| delete_flag     | INT            | 0 is not deleted, 1 is deleted |
 
 ### Generate Fake Data
 
