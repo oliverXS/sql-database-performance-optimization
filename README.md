@@ -3,24 +3,28 @@
 - [SQL Database Performance Optimization Step by Step](#sql-database-performance-optimization-step-by-step)
   - [Step1 Add Index](#step1-add-index)
     - [Table Design](#table-design)
-    - [Generate Data](#generate-data)
+    - [Generate Fake Data](#generate-fake-data)
     - [Without an index](#without-an-index)
     - [With an index](#with-an-index)
   - [Step2 Introduce Redis as cache](#step2-introduce-redis-as-cache)
     - [Core Code](#core-code)
     - [Performance Evaluation](#performance-evaluation)
+      - [Test API by Postman](#test-api-by-postman)
     - [Strategies to Enhance Cache Hit Rate](#strategies-to-enhance-cache-hit-rate)
       - [1. Identifying Appropriate Business Scenarios](#1-identifying-appropriate-business-scenarios)
       - [2. Setting the Cache Capacity Judiciously](#2-setting-the-cache-capacity-judiciously)
       - [3. Fine-tuning Cache Expiration Time](#3-fine-tuning-cache-expiration-time)
       - [4. Mitigating Cache Penetration](#4-mitigating-cache-penetration)
       - [5. Implementing Cache Warm-Up](#5-implementing-cache-warm-up)
-  - [Step3 Read/Write Splitting](#step3-readwrite-splitting)
-  - [Step4 Database Table Horizontal Sharding and Partitioning](#step4-database-table-horizontal-sharding-and-partitioning)
+  - [Step3 Master-slave synchronization](#step3-master-slave-synchronization)
+      - [The principle of master-slave replication](#the-principle-of-master-slave-replication)
+      - [Advantages of master-slave replication](#advantages-of-master-slave-replication)
+  - [Step4 Read/Write Splitting](#step4-readwrite-splitting)
+  - [Step5 Database Table Horizontal Sharding and Partitioning](#step5-database-table-horizontal-sharding-and-partitioning)
       - [1. Horizontal Sharding](#1-horizontal-sharding)
       - [2. Horizontal Partitioning](#2-horizontal-partitioning)
       - [3. Horizontal Sharding and Partitioning](#3-horizontal-sharding-and-partitioning)
-  - [Step4 Router Policy and Global ID in a Multi-Database and Multi-Table Environment](#step4-router-policy-and-global-id-in-a-multi-database-and-multi-table-environment)
+  - [Step6 Router Policy and Global ID in a Multi-Database and Multi-Table Environment](#step6-router-policy-and-global-id-in-a-multi-database-and-multi-table-environment)
     - [Scenarios for Multi-Table Queries](#scenarios-for-multi-table-queries)
     - [Router Policy for User (toC)](#router-policy-for-user-toc)
       - [1. Start from a Multi-table environment](#1-start-from-a-multi-table-environment)
@@ -376,13 +380,34 @@ To prevent this, an empty object can be set in the cache for such query requests
 
 To enhance cache hit rate, the practice of "warming up" the cache can be employed. This process involves pre-loading relevant data from the database into the Redis cache. Thus, when a query is made for the first time, the data can be directly fetched from the cache, resulting in faster response times.
 
-## Step3 Read/Write Splitting
+## Step3 Master-slave synchronization
+
+Transfer the operation of the master database to the slave database through binary logs, and then re-execute these logs on the slave database. Keep the slave library and the main library data in sync.
+
+![master-slave](./images/master-slave.png)
+
+#### The principle of master-slave replication
+
+1. Master DB will save the data changes in the binary log file Binlog when the transaction is submitted.
+2. Slave DB reads Master DB's binary log file Binlog and writes it to the relay log Relay Log.
+
+3. Slave DB redoes events in the relay log, which will change and reflect its own data.
+
+#### Advantages of master-slave replication
+
+1. If there is a problem with the main library, quickly switch to provide services from the library.
+
+2. Achieve read-write separation and reduce the access pressure of the main library.
+
+3. Backups can be performed from the library to avoid affecting the main library service during the backup.
+
+## Step4 Read/Write Splitting
 
 ![read-write-split-architecture](./images/read-write-split-architecture.png)
 
 ![read-write-split-config-flow-chart](./images/read-write-split-config-flow-chart.png)
 
-## Step4 Database Table Horizontal Sharding and Partitioning
+## Step5 Database Table Horizontal Sharding and Partitioning
 
 In Step 3, we improved the performance of data retrieval by implementing the master-slave mode. However, we have yet to find a solution to enhance the writing capability of the primary database. Therefore, in this phase, I propose horizontally sharding and partitioning the tables in the database to improve the performance of data insertion.
 
@@ -400,7 +425,7 @@ In Step 3, we improved the performance of data retrieval by implementing the mas
 
 Horizontal sharding and partitioning offer the advantages of increased parallelism, reduced contention, improved scalability, targeted optimization, and workload isolation, resulting in optimized write performance. By distributing data across multiple shards or partitions, concurrent writes can be achieved, minimizing contention for system resources, and enabling linear scalability. Each shard or partition can be optimized individually, allowing for tailored indexing and performance optimizations, while workload isolation prevents write-intensive operations from impacting other critical processes. 
 
-## Step4 Router Policy and Global ID in a Multi-Database and Multi-Table Environment
+## Step6 Router Policy and Global ID in a Multi-Database and Multi-Table Environment
 
 ### Scenarios for Multi-Table Queries
 
