@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    masters:
+#      - url: jdbc:mysql://{input_url}/order_db?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
+        username: root
+#        password:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    slaves:
+#      - url: jdbc:mysql://{input_url}/order_db?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
+        username: root
+#        password:
+        driver-class-name: com.mysql.cj.jdbc.Driver
