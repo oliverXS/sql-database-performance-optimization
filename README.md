@@ -409,7 +409,7 @@ Transfer the operation of the master database to the slave database through bina
 
 ## Step5 Database Table Horizontal Sharding and Partitioning
 
-In Step 3, we improved the performance of data retrieval by implementing the master-slave mode. However, we have yet to find a solution to enhance the writing capability of the primary database. Therefore, in this phase, I propose horizontally sharding and partitioning the tables in the database to improve the performance of data insertion.
+In Step 3, we improved the performance of data retrieval by implementing the master-slave mode. However, we have yet to find a solution to enhance the **writing** capability of the primary database. Therefore, in this phase, I propose horizontally sharding and partitioning the tables in the database to improve the performance of data insertion.
 
 #### 1. Horizontal Sharding
 
