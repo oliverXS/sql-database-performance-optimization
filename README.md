@@ -455,6 +455,140 @@ Following the previous approach, first locate the database containing the order 
 
 User places an order -> Generate an order -> Use the hash value of user_id to perform modulo operation with the number of databases to locate the corresponding database -> Divide the hash value of user_id by the number of tables and perform modulo operation to locate the corresponding table.
 
+#### 3. Core Code
+
+```Java
+/**
+ * Custom database routing algorithm: user_id % db_size
+ */
+public class OrderDbShardingByUserAlgorithm implements ComplexKeysShardingAlgorithm<Comparable<?>> {
+
+    /**
+     * The main method to perform sharding for databases based on the sharding value.
+     * @param dbs The collection of available database names.
+     * @param shardingValue The sharding value containing the column names and their corresponding sharding values.
+     * @return The collection of actual database names that the data should be routed to.
+     */
+    @Override
+    public Collection<String> doSharding(Collection<String> dbs, ComplexKeysShardingValue<Comparable<?>> shardingValue) {
+        Collection<Comparable<?>> orderNos = shardingValue.getColumnNameAndShardingValuesMap().get("order_no");
+        Collection<Comparable<?>> userIds = shardingValue.getColumnNameAndShardingValuesMap().get("user_id");
+        Set<String> actualDbNames = null;
+
+        // Perform sharding based on "order_no" column if available
+        if (CollectionUtils.isNotEmpty(orderNos)) {
+            actualDbNames = orderNos.stream()
+                    .map(orderNo -> getActualDbName(String.valueOf(orderNo), dbs))
+                    .collect(Collectors.toSet());
+        }
+        // Otherwise, perform sharding based on "user_id" column if available
+        else if (CollectionUtils.isNotEmpty(userIds)) {
+            actualDbNames = userIds.stream()
+                    .map(userId -> getActualDbName(String.valueOf(userId), dbs))
+                    .collect(Collectors.toSet());
+        }
+
+        return actualDbNames;
+    }
+
+    /**
+     * Method to calculate the actual database name to which data should be routed.
+     * @param shardingValue The sharding value (either order_no or user_id) for which the database should be determined.
+     * @param dbs The collection of available database names.
+     * @return The actual database name to which the data should be routed.
+     */
+    public String getActualDbName(String shardingValue, Collection<String> dbs) {
+        // Extract the last three digits of the sharding value (either order_no or user_id)
+        String userIdSuffix = StringUtils.substring(shardingValue, shardingValue.length() - 3);
+
+        // Use the last three digits of the sharding value for routing
+        int dbSuffix = userIdSuffix.hashCode() % dbs.size();
+
+        // Find the database name that ends with the calculated suffix
+        for (String db : dbs) {
+            if (db.endsWith(String.valueOf(dbSuffix))) {
+                return db;
+            }
+        }
+
+        // Return null if no matching database name is found (this should not happen in a well-configured sharded environment)
+        return null;
+    }
+}
+```
+
+```Java
+/**
+ * Custom database routing algorithm: user_id / db_size % db_size
+ */
+public class OrderTableShardingByUserAlgorithm implements ComplexKeysShardingAlgorithm<Comparable<?>> {
+
+    /**
+     * The main method to perform sharding for tables based on the sharding value.
+     * @param tables The collection of available table names.
+     * @param shardingValue The sharding value containing the column names and their corresponding sharding values.
+     * @return The collection of actual table names that the data should be routed to.
+     */
+    @Override
+    public Collection<String> doSharding(Collection<String> tables, ComplexKeysShardingValue<Comparable<?>> shardingValue) {
+        Collection<Comparable<?>> orderNos = shardingValue.getColumnNameAndShardingValuesMap().get("order_no");
+        Collection<Comparable<?>> userIds = shardingValue.getColumnNameAndShardingValuesMap().get("user_id");
+        Set<String> actualTableNames = null;
+
+        // Perform sharding based on "order_no" column if available
+        if (CollectionUtils.isNotEmpty(orderNos)) {
+            actualTableNames = orderNos.stream()
+                    .map(orderNo -> getActualTableName(String.valueOf(orderNo), tables))
+                    .collect(Collectors.toSet());
+        }
+        // Otherwise, perform sharding based on "user_id" column if available
+        else if (CollectionUtils.isNotEmpty(userIds)) {
+            actualTableNames = userIds.stream()
+                    .map(userId -> getActualTableName(String.valueOf(userId), tables))
+                    .collect(Collectors.toSet());
+        }
+
+        return actualTableNames;
+    }
+
+    /**
+     * Method to calculate the actual table name to which data should be routed.
+     * @param shardingValue The sharding value (either order_no or user_id) for which the table should be determined.
+     * @param tables The collection of available table names.
+     * @return The actual table name to which the data should be routed.
+     */
+    public String getActualTableName(String shardingValue, Collection<String> tables) {
+        // Get the last three digits of the sharding value (either order_no or user_id)
+        String userIdSuffix = StringUtils.substring(shardingValue, shardingValue.length() - 3);
+
+        // Use the last three digits of the sharding value for routing
+        int tableSuffix = userIdSuffix.hashCode() / tables.size() % tables.size();
+
+        // Find the table name that ends with the calculated suffix
+        for (String table : tables) {
+            if (table.endsWith(String.valueOf(tableSuffix))) {
+                return table;
+            }
+        }
+
+        // Return null if no matching table name is found (this should not happen in a well-configured sharded environment)
+        return null;
+    }
+}
+
+```
+
+Data Flow Direction:
+
+1. Request Data: The data flow begins with a request for data from the client or user.
+2. Business Logic Processing: The request is processed by the application's business logic layer, where specific business rules, data processing, and other operations are performed.
+3. Mapper Generates Logical SQL: Within the business logic layer, a data access layer (often called a mapper) generates logical SQL queries based on the business requirements and data access operations.
+4. Routing Key: Before the SQL queries are executed, a routing key is determined based on the sharding key present in the logical SQL. The sharding key is a part of the data that is used to determine how data should be distributed across different databases or tables.
+5. Routing Strategy: The routing key is used by the routing strategy of ShardingSphere, which defines how the routing key is mapped to specific databases or tables. The routing strategy is defined in the ShardingSphere configuration.
+6. Specific Database: Using the routing strategy, ShardingSphere identifies the specific database (or databases) to which the data request should be directed based on the routing key.
+7. Selecting Table: Once the database is determined, ShardingSphere further selects the specific table (or tables) within that database where the data should be stored or retrieved, again based on the routing key.
+8. ShardingSphere Generates Actual SQL: Finally, ShardingSphere generates the actual SQL statements that are specific to the selected databases and tables. The generated SQL contains the necessary database-specific syntax and is ready to be executed against the target database.
+
 ### Router Policy for Merchant (toB)
 
 The merchant should be able to retrieve the corresponding user's order information. However, the merchant should not use user_id as the routing key. This is not reasonable.
